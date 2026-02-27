@@ -2,14 +2,12 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
 <title>Horaires de Prière — Casablanca</title>
 
 <style>
   :root{
     --bg:#0b0b0f;
-    --panel:#121218;
-    --panel2:#151521;
     --text:#f2f2f6;
     --muted:#b7b7c8;
     --muted2:#7f7f93;
@@ -20,9 +18,20 @@
     --radius:22px;
   }
   *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
+  html, body{
+    width:100%;
+    height:100%;
     margin:0;
+    padding:0;
+    overflow:hidden; /* IMPORTANT pour iframe */
+    background: var(--bg);
+  }
+  /* dvh/svh fix Android + fallback */
+  .screen{
+    width:100%;
+    height:100vh;
+    height:100svh;
+    height:100dvh;
     background:
       radial-gradient(1200px 700px at 18% 12%, rgba(229,9,20,.22), transparent 55%),
       radial-gradient(900px 600px at 85% 85%, rgba(229,9,20,.12), transparent 60%),
@@ -30,76 +39,48 @@
       var(--bg);
     color:var(--text);
     font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+    display:flex;
   }
 
+  /* Kiosk mode: no outer padding, full bleed */
   .wrap{
-    height:100vh;
+    width:100%;
+    height:100%;
     padding:22px;
-    max-width:1400px;
-    margin:0 auto;
     display:flex;
     flex-direction:column;
     gap:14px;
+    min-height:0;
   }
+  /* If kiosk=1 -> remove padding */
+  body.kiosk .wrap{ padding:0; gap:0; }
 
-  /* Top bar */
   .topbar{
     display:flex;
     align-items:center;
     justify-content:space-between;
     gap:12px;
+    padding:0;
   }
-  .brand{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    min-width:0;
-  }
+  body.kiosk .topbar{ padding:18px 18px 10px; }
+
+  .brand{display:flex;align-items:center;gap:12px;min-width:0;}
   .logo{
-    width:14px;
-    height:28px;
-    border-radius:5px;
+    width:14px;height:28px;border-radius:5px;
     background: linear-gradient(180deg, var(--red), var(--red2));
     box-shadow: 0 14px 30px rgba(229,9,20,.35);
     flex:0 0 auto;
   }
-  .titleBlock{min-width:0}
-  .title{
-    font-weight:900;
-    letter-spacing:.6px;
-    font-size:20px;
-    line-height:1.1;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-  .subtitle{
-    margin-top:4px;
-    color:var(--muted2);
-    font-size:12px;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
+  .title{font-weight:900;letter-spacing:.6px;font-size:20px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .subtitle{margin-top:4px;color:var(--muted2);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-  .right{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    flex:0 0 auto;
-  }
+  .right{display:flex;align-items:center;gap:10px;flex:0 0 auto;}
   .badge{
-    padding:8px 12px;
-    border-radius:999px;
+    padding:8px 12px;border-radius:999px;
     border:1px solid rgba(229,9,20,.38);
     background: rgba(229,9,20,.12);
-    color:#ffd7da;
-    font-weight:900;
-    font-size:12px;
-    letter-spacing:.4px;
-    display:flex;
-    align-items:center;
-    gap:8px;
+    color:#ffd7da;font-weight:900;font-size:12px;letter-spacing:.4px;
+    display:flex;align-items:center;gap:8px;
   }
   .dotLive{
     width:8px;height:8px;border-radius:50%;
@@ -107,33 +88,27 @@
     box-shadow: 0 0 0 6px rgba(229,9,20,.14);
     animation: pulse 1.2s infinite;
   }
-  @keyframes pulse{
-    0%,100%{transform:scale(1); opacity:1}
-    50%{transform:scale(1.2); opacity:.7}
-  }
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.2);opacity:.7}}
 
   .clock{
-    padding:10px 14px;
-    border-radius:999px;
+    padding:10px 14px;border-radius:999px;
     border:1px solid var(--border);
     background: rgba(255,255,255,.04);
     box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
-    font-weight:900;
-    font-size:14px;
-    letter-spacing:1px;
+    font-weight:900;font-size:14px;letter-spacing:1px;
   }
 
-  /* Main layout */
   .grid{
     display:grid;
     grid-template-columns: 1.05fr .95fr;
     gap:14px;
     flex:1 1 auto;
     min-height:0;
+    padding:0;
   }
-  @media (max-width: 980px){
-    .grid{grid-template-columns:1fr}
-  }
+  body.kiosk .grid{ padding:0 18px 18px; }
+
+  @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
 
   .card{
     border-radius: var(--radius);
@@ -143,246 +118,151 @@
     overflow:hidden;
     min-height:0;
   }
+  body.kiosk .card{ border-radius: 18px; }
+
   .cardHead{
     padding:14px 16px;
     border-bottom:1px solid rgba(255,255,255,.08);
     background: rgba(0,0,0,.14);
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:12px;
+    display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
   }
-  .cardHead h2{
-    margin:0;
-    font-size:14px;
-    letter-spacing:.4px;
-  }
-  .meta{
-    margin-top:4px;
-    font-size:12px;
-    color:var(--muted2);
-  }
+  .cardHead h2{margin:0;font-size:14px;letter-spacing:.4px}
+  .meta{margin-top:4px;font-size:12px;color:var(--muted2)}
 
-  /* Countdown */
-  .countdownBox{
-    padding:14px 16px;
-  }
-  .nextRow{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-    flex-wrap:wrap;
-  }
-  .nextLabel{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    min-width:0;
-  }
+  .countdownBox{padding:14px 16px;}
+  .nextRow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
   .chip{
-    padding:6px 10px;
-    border-radius:999px;
+    padding:6px 10px;border-radius:999px;
     border:1px solid rgba(255,255,255,.10);
     background: rgba(255,255,255,.04);
     color:var(--muted);
-    font-weight:800;
-    font-size:12px;
+    font-weight:800;font-size:12px;
   }
-  .nextName{
-    font-weight:950;
-    font-size:20px;
-    letter-spacing:.3px;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-  .nextTime{
-    color:var(--muted);
-    font-weight:900;
-    font-size:14px;
-  }
-  .timer{
-    font-weight:950;
-    font-size:44px;
-    letter-spacing:1px;
-    color:#fff;
-    text-shadow: 0 10px 26px rgba(0,0,0,.45);
-  }
-  .timerSub{
-    margin-top:6px;
-    font-size:12px;
-    color:var(--muted2);
-  }
-
+  .nextName{font-weight:950;font-size:20px;letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .nextTime{color:var(--muted);font-weight:900;font-size:14px;}
+  .timer{font-weight:950;font-size:44px;letter-spacing:1px;color:#fff;text-shadow: 0 10px 26px rgba(0,0,0,.45);}
+  .timerSub{margin-top:6px;font-size:12px;color:var(--muted2);}
   .divider{height:1px;background:rgba(255,255,255,.08);margin:14px 0}
 
-  /* Prayer grid */
   .prayers{
     display:grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap:10px;
   }
-  @media (max-width: 980px){
-    .prayers{grid-template-columns: repeat(3, minmax(0, 1fr));}
-  }
-  @media (max-width: 520px){
-    .prayers{grid-template-columns: repeat(2, minmax(0, 1fr));}
-    .timer{font-size:36px}
-  }
+  @media (max-width: 980px){ .prayers{grid-template-columns: repeat(3, minmax(0, 1fr));} }
+  @media (max-width: 520px){ .prayers{grid-template-columns: repeat(2, minmax(0, 1fr));} .timer{font-size:36px} }
+
   .pCard{
-    border-radius:18px;
-    border:1px solid rgba(255,255,255,.10);
+    border-radius:18px;border:1px solid rgba(255,255,255,.10);
     background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-    padding:12px 12px;
-    position:relative;
-    overflow:hidden;
+    padding:12px 12px;position:relative;overflow:hidden;
   }
-  .pCard .lbl{
-    font-size:12px;
-    color:var(--muted);
-    letter-spacing:.3px;
-  }
-  .pCard .val{
-    margin-top:6px;
-    font-size:22px;
-    font-weight:950;
-    letter-spacing:.3px;
-  }
+  .pCard .lbl{font-size:12px;color:var(--muted);letter-spacing:.3px;}
+  .pCard .val{margin-top:6px;font-size:22px;font-weight:950;letter-spacing:.3px;}
   .pCard.active{
     border-color: rgba(229,9,20,.45);
     background: linear-gradient(180deg, rgba(229,9,20,.16), rgba(255,255,255,.02));
   }
   .pCard.active:before{
-    content:"";
-    position:absolute;
-    inset:-60px -60px auto auto;
+    content:"";position:absolute;inset:-60px -60px auto auto;
     width:140px;height:140px;
     background: radial-gradient(circle at 40% 40%, rgba(229,9,20,.42), transparent 60%);
     transform: rotate(25deg);
   }
   .activeTag{
-    position:absolute;
-    top:10px; right:10px;
-    padding:6px 10px;
-    border-radius:999px;
+    position:absolute;top:10px;right:10px;
+    padding:6px 10px;border-radius:999px;
     background: rgba(229,9,20,.16);
     border:1px solid rgba(229,9,20,.35);
-    font-size:11px;
-    font-weight:950;
-    color:#ffd7da;
-    letter-spacing:.4px;
+    font-size:11px;font-weight:950;color:#ffd7da;letter-spacing:.4px;
   }
 
-  /* Side panel */
-  .sideContent{
-    padding:14px 16px;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    min-height:0;
-  }
-  .infoRow{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-  }
+  .sideContent{padding:14px 16px;display:flex;flex-direction:column;gap:12px;min-height:0;}
+  .infoRow{display:flex;gap:10px;flex-wrap:wrap;}
   .infoPill{
-    padding:10px 12px;
-    border-radius:999px;
+    padding:10px 12px;border-radius:999px;
     border:1px solid rgba(255,255,255,.10);
     background: rgba(255,255,255,.04);
-    color:var(--muted);
-    font-weight:800;
-    font-size:12px;
+    color:var(--muted);font-weight:800;font-size:12px;
   }
-  .status{
-    margin-top:auto;
-    font-size:12px;
-    color:var(--muted2);
-    line-height:1.35;
-  }
+  .status{margin-top:auto;font-size:12px;color:var(--muted2);line-height:1.35;}
   .status strong{color:var(--muted)}
 </style>
 </head>
 
 <body>
-<div class="wrap">
-
-  <div class="topbar">
-    <div class="brand">
-      <div class="logo"></div>
-      <div class="titleBlock">
-        <div class="title" id="mainTitle">CASABLANCA</div>
-        <div class="subtitle" id="subTitle">Horaires de prière — Méthode Maroc</div>
-      </div>
-    </div>
-
-    <div class="right">
-      <div class="badge" id="modeBadge"><span class="dotLive"></span><span id="badgeText">LIVE</span></div>
-      <div class="clock" id="clock">--:--:--</div>
-    </div>
-  </div>
-
-  <div class="grid">
-    <!-- Left / main -->
-    <div class="card">
-      <div class="cardHead">
-        <div>
-          <h2>Prochaine prière</h2>
-          <div class="meta" id="dateLine">Chargement…</div>
-        </div>
-        <div class="badge" id="ramadanBadge" style="display:none;">
-          <span class="dotLive"></span><span>RAMADAN</span>
+<div class="screen">
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo"></div>
+        <div style="min-width:0">
+          <div class="title" id="mainTitle">CASABLANCA</div>
+          <div class="subtitle" id="subTitle">Horaires de prière • Toute l’année</div>
         </div>
       </div>
 
-      <div class="countdownBox">
-        <div class="nextRow">
-          <div class="nextLabel">
-            <span class="chip">Next</span>
-            <div class="nextName" id="nextName">—</div>
-            <div class="nextTime" id="nextTime">—</div>
+      <div class="right">
+        <div class="badge" id="modeBadge"><span class="dotLive"></span><span id="badgeText">LIVE</span></div>
+        <div class="clock" id="clock">--:--:--</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="cardHead">
+          <div>
+            <h2>Prochaine prière</h2>
+            <div class="meta" id="dateLine">Chargement…</div>
           </div>
-          <div style="text-align:right">
-            <div class="timer" id="countdown">--:--:--</div>
-            <div class="timerSub" id="countdownSub">Compte à rebours automatique</div>
+          <div class="badge" id="ramadanBadge" style="display:none;">
+            <span class="dotLive"></span><span>RAMADAN</span>
           </div>
         </div>
 
-        <div class="divider"></div>
+        <div class="countdownBox">
+          <div class="nextRow">
+            <div style="display:flex;align-items:center;gap:10px;min-width:0;flex-wrap:wrap">
+              <span class="chip">Next</span>
+              <div class="nextName" id="nextName">—</div>
+              <div class="nextTime" id="nextTime">—</div>
+            </div>
+            <div style="text-align:right">
+              <div class="timer" id="countdown">--:--:--</div>
+              <div class="timerSub" id="countdownSub">Compte à rebours</div>
+            </div>
+          </div>
 
-        <div class="prayers" id="prayerGrid">
-          <!-- injected -->
+          <div class="divider"></div>
+          <div class="prayers" id="prayerGrid"></div>
         </div>
       </div>
-    </div>
 
-    <!-- Right / info -->
-    <div class="card">
-      <div class="cardHead">
-        <div>
-          <h2>Infos</h2>
-          <div class="meta">Widget annuel • Casablanca</div>
-        </div>
-        <div class="badge"><span class="dotLive"></span><span>Power Smart Screen</span></div>
-      </div>
-
-      <div class="sideContent">
-        <div class="infoRow">
-          <div class="infoPill" id="hijriLine">Hijri: —</div>
-          <div class="infoPill" id="tzLine">TZ: Africa/Casablanca</div>
-          <div class="infoPill" id="methodLine">Méthode: Maroc (21)</div>
+      <div class="card">
+        <div class="cardHead">
+          <div>
+            <h2>Infos</h2>
+            <div class="meta">Widget annuel • Casablanca</div>
+          </div>
+          <div class="badge"><span class="dotLive"></span><span>Power Smart Screen</span></div>
         </div>
 
-        <div class="infoRow">
-          <div class="infoPill" id="sunriseLine">Sunrise: —</div>
-          <div class="infoPill" id="updatedLine">MAJ: —</div>
-        </div>
+        <div class="sideContent">
+          <div class="infoRow">
+            <div class="infoPill" id="hijriLine">Hijri: —</div>
+            <div class="infoPill">TZ: Africa/Casablanca</div>
+            <div class="infoPill">Méthode: Maroc (21)</div>
+          </div>
 
-        <div class="status" id="status">
-          <strong>Source:</strong> API AlAdhan • Auto-refresh 6h<br>
-          Si un écran a un réseau instable, le widget garde la dernière valeur chargée.
+          <div class="infoRow">
+            <div class="infoPill" id="sunriseLine">Sunrise: —</div>
+            <div class="infoPill" id="updatedLine">MAJ: —</div>
+          </div>
+
+          <div class="status" id="status">
+            <strong>Source:</strong> AlAdhan • Auto-refresh 6h<br>
+            Mode plein écran compatible iframe.
+          </div>
         </div>
       </div>
     </div>
@@ -390,17 +270,18 @@
 </div>
 
 <script>
-  // Casablanca fixe
+  // Kiosk param
+  const qs = new URLSearchParams(location.search);
+  if(qs.get("kiosk") === "1") document.body.classList.add("kiosk");
+
   const CONFIG = {
     city: "Casablanca",
     country: "Morocco",
     methodId: 21,
     timeZone: "Africa/Casablanca",
-    // refresh API
     apiRefreshMs: 6 * 60 * 60 * 1000,
   };
 
-  // Endpoints fallback (si l'un est bloqué)
   const ENDPOINTS = [
     `https://api.aladhan.com/v1/timingsByCity?city=${encodeURIComponent(CONFIG.city)}&country=${encodeURIComponent(CONFIG.country)}&method=${CONFIG.methodId}`,
     `https://api.aladhan.com/v1/timingsByCity?city=${encodeURIComponent(CONFIG.city)}&country=${encodeURIComponent(CONFIG.country)}&method=${CONFIG.methodId}&school=0`
@@ -409,7 +290,6 @@
   const $ = (id)=>document.getElementById(id);
 
   const PRAYER_ORDER = [
-    { key:"Imsak",   label:"Imsak" },
     { key:"Fajr",    label:"Fajr" },
     { key:"Sunrise", label:"Sunrise" },
     { key:"Dhuhr",   label:"Dhuhr" },
@@ -419,14 +299,11 @@
   ];
 
   let lastData = null;
-  let lastUpdatedAt = null;
 
-  function hhmm(v){
-    return (v || "").split(" ")[0].trim() || "--:--";
-  }
+  function hhmm(v){ return (v || "").split(" ")[0].trim() || "--:--"; }
+  function secondsSinceMidnight(h,m,s){ return h*3600 + m*60 + s; }
 
   function nowInTZ(){
-    // Current time in Casablanca TZ
     const parts = new Intl.DateTimeFormat("en-GB", {
       timeZone: CONFIG.timeZone,
       year:"numeric",month:"2-digit",day:"2-digit",
@@ -434,10 +311,7 @@
       hour12:false
     }).formatToParts(new Date());
     const m = Object.fromEntries(parts.map(p=>[p.type,p.value]));
-    return {
-      y:+m.year, mo:+m.month, d:+m.day,
-      h:+m.hour, mi:+m.minute, s:+m.second
-    };
+    return { h:+m.hour, mi:+m.minute, s:+m.second };
   }
 
   function clockTick(){
@@ -446,28 +320,8 @@
     $("clock").textContent = `${pad(t.h)}:${pad(t.mi)}:${pad(t.s)}`;
   }
 
-  function parseTodayDateISOFromApi(apiDateStr){
-    // AlAdhan gregorian.date is like "27-02-2026"
-    if(!apiDateStr) return null;
-    const [dd,mm,yy] = apiDateStr.split("-");
-    return `${yy}-${mm}-${dd}`; // ISO
-  }
-
-  function makeDateInTZ(isoDate, hhmmStr){
-    // Build a Date object representing local time in Casablanca.
-    // We'll convert to a comparable timestamp by constructing a UTC date from components
-    // then offset using the local time parts from Intl where needed.
-    // Simpler: create a Date from ISO in UTC then add hours/min; used for differences with "nowInTZ" parts.
-    const [y,m,d] = isoDate.split("-").map(Number);
-    const [hh,mm] = hhmmStr.split(":").map(Number);
-    // Create as UTC; we'll compare using custom "nowParts" -> seconds since midnight.
-    return { y, m, d, hh, mm };
-  }
-
-  function secondsSinceMidnight(h,m,s){ return h*3600 + m*60 + s; }
-
   function buildPrayerGrid(timings, nextKey){
-    const html = PRAYER_ORDER.map(p=>{
+    $("prayerGrid").innerHTML = PRAYER_ORDER.map(p=>{
       const v = hhmm(timings[p.key]);
       const active = p.key === nextKey;
       return `
@@ -478,55 +332,32 @@
         </div>
       `;
     }).join("");
-    $("prayerGrid").innerHTML = html;
   }
 
-  function computeNextPrayer(timings, gregISO){
+  function computeNextPrayer(timings){
     const now = nowInTZ();
     const nowSec = secondsSinceMidnight(now.h, now.mi, now.s);
 
-    // Build list for today (ignore empty)
     const todayList = PRAYER_ORDER
-      .filter(p => timings[p.key])
       .map(p => ({ key:p.key, label:p.label, time: hhmm(timings[p.key]) }))
       .filter(x => /^\d{2}:\d{2}$/.test(x.time));
 
-    // Find first prayer time strictly after now
     for(const item of todayList){
       const [hh,mm] = item.time.split(":").map(Number);
       const sec = secondsSinceMidnight(hh,mm,0);
       if(sec > nowSec){
-        return {
-          nextKey: item.key,
-          nextLabel: item.label,
-          nextTime: item.time,
-          // countdown in seconds
-          countdownSec: sec - nowSec
-        };
+        return { nextKey:item.key, nextLabel:item.label, nextTime:item.time, countdownSec: sec - nowSec };
       }
     }
 
-    // Otherwise next is tomorrow's Fajr (use today's Fajr as base time for countdown to tomorrow)
+    // Next is tomorrow's Fajr
     const fajr = todayList.find(x=>x.key==="Fajr");
     if(fajr){
       const [fh,fm] = fajr.time.split(":").map(Number);
       const fajrSec = secondsSinceMidnight(fh,fm,0);
-      const remainingToday = (24*3600) - nowSec;
-      return {
-        nextKey: "Fajr",
-        nextLabel: "Fajr",
-        nextTime: fajr.time,
-        countdownSec: remainingToday + fajrSec
-      };
+      return { nextKey:"Fajr", nextLabel:"Fajr", nextTime:fajr.time, countdownSec: (24*3600 - nowSec) + fajrSec };
     }
-
-    // Fallback
-    return {
-      nextKey: todayList[0]?.key || "Maghrib",
-      nextLabel: todayList[0]?.label || "Maghrib",
-      nextTime: todayList[0]?.time || "--:--",
-      countdownSec: 0
-    };
+    return { nextKey:todayList[0]?.key || "Maghrib", nextLabel:todayList[0]?.label || "Maghrib", nextTime:todayList[0]?.time || "--:--", countdownSec:0 };
   }
 
   function formatCountdown(sec){
@@ -540,47 +371,37 @@
 
   function updateUIFromData(data){
     lastData = data;
-    lastUpdatedAt = new Date();
-
     const timings = data.data.timings || {};
     const g = data.data.date?.gregorian;
     const h = data.data.date?.hijri;
 
-    const gregISO = parseTodayDateISOFromApi(g?.date);
     const gregLabel = g?.date ? g.date : "—";
     const weekday = g?.weekday?.en ? g.weekday.en : "";
     const hijriLabel = (h?.day && h?.month?.en && h?.year) ? `${h.day} ${h.month.en} ${h.year}` : "—";
     const hijriMonthNum = Number(h?.month?.number || 0);
 
-    // Titles / Ramadan badge
     $("mainTitle").textContent = hijriMonthNum === 9 ? "RAMADAN — CASABLANCA" : "CASABLANCA";
-    $("subTitle").textContent = hijriMonthNum === 9 ? "Horaires Ramadan • Suhoor / Iftar + Prières" : "Horaires de prière • Toute l’année";
+    $("subTitle").textContent = hijriMonthNum === 9 ? "Ramadan • Horaires + Compte à rebours" : "Horaires de prière • Toute l’année";
     $("ramadanBadge").style.display = (hijriMonthNum === 9) ? "flex" : "none";
-    $("badgeText").textContent = "LIVE";
 
     $("dateLine").textContent = `${gregLabel}${weekday ? " • " + weekday : ""}`;
     $("hijriLine").textContent = `Hijri: ${hijriLabel}`;
     $("sunriseLine").textContent = `Sunrise: ${hhmm(timings.Sunrise)}`;
 
-    // Next prayer + countdown
-    const next = computeNextPrayer(timings, gregISO);
+    const next = computeNextPrayer(timings);
     $("nextName").textContent = next.nextLabel;
     $("nextTime").textContent = next.nextTime !== "--:--" ? `à ${next.nextTime}` : "—";
     buildPrayerGrid(timings, next.nextKey);
 
-    // show updated time
-    const parts = nowInTZ();
-    const pad = (n)=>String(n).padStart(2,"0");
-    $("updatedLine").textContent = `MAJ: ${pad(parts.h)}:${pad(parts.mi)}`;
-
-    // prime countdown state
     window.__countdownSec = next.countdownSec;
-    $("countdown").textContent = formatCountdown(window.__countdownSec);
-    $("countdownSub").textContent = "Compte à rebours jusqu’à la prochaine prière";
+
+    const t = nowInTZ();
+    const pad = (n)=>String(n).padStart(2,"0");
+    $("updatedLine").textContent = `MAJ: ${pad(t.h)}:${pad(t.mi)}`;
 
     $("status").innerHTML =
-      `<strong>Source:</strong> AlAdhan • Méthode Maroc (${CONFIG.methodId}) • TZ ${CONFIG.timeZone}<br>` +
-      `Auto-refresh API: toutes les 6h • Horloge & compte à rebours live`;
+      `<strong>Source:</strong> AlAdhan • Méthode Maroc (${CONFIG.methodId})<br>` +
+      `Auto-refresh 6h • Horloge & compte à rebours live`;
   }
 
   async function fetchWithFallback(){
@@ -592,54 +413,44 @@
         const json = await res.json();
         if(!json || !json.data || !json.data.timings) throw new Error("Bad payload");
         return json;
-      }catch(e){
-        lastErr = e;
-      }
+      }catch(e){ lastErr = e; }
     }
     throw lastErr || new Error("Fetch failed");
   }
 
   async function refreshData(){
     try{
+      $("badgeText").textContent = "LIVE";
       const data = await fetchWithFallback();
       updateUIFromData(data);
     }catch(e){
-      // Keep last known values if any
       if(lastData){
         $("badgeText").textContent = "LIVE • OFFLINE";
-        $("status").innerHTML =
-          `<strong>Connexion instable.</strong> Affichage des dernières données chargées.<br>` +
-          `Nouvelle tentative automatique.`;
+        $("status").innerHTML = `<strong>Connexion instable.</strong> Dernières données conservées.`;
       }else{
-        $("status").innerHTML =
-          `<strong>Connexion indisponible.</strong><br>` +
-          `Impossible de charger les horaires pour le moment.`;
+        $("status").innerHTML = `<strong>Connexion indisponible.</strong> Impossible de charger les horaires.`;
       }
     }
   }
 
-  // Countdown tick each second
   function countdownTick(){
     if(typeof window.__countdownSec !== "number") return;
     if(window.__countdownSec > 0) window.__countdownSec -= 1;
     $("countdown").textContent = formatCountdown(window.__countdownSec);
-
-    // When hits 0, refresh to compute next prayer immediately
     if(window.__countdownSec === 0){
       refreshData();
-      // avoid negative loop
       window.__countdownSec = 1;
     }
   }
 
-  // Init
   clockTick();
   setInterval(clockTick, 1000);
 
   refreshData();
   setInterval(refreshData, CONFIG.apiRefreshMs);
-  setInterval(countdownTick, 1000);
 
+  $("countdown").textContent = "--:--:--";
+  setInterval(countdownTick, 1000);
 </script>
 </body>
 </html>
